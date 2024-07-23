@@ -1,0 +1,10 @@
+Process initialized
+Process terminated
+Process initialized
+Process terminated
+Process initialized
+Executing process: 22/06/YYYY 10:06:46
+Executing process: 22/06/YYYY 10:06:51
+Executing process: 22/06/YYYY 10:06:56
+Executing process: 22/07/YYYY 10:07:01
+Process terminated
