@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
+using dotnetApiCourse.DTOs;
 using dotnetApiCourse.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,30 +15,52 @@ namespace dotnetApiCourse.Controllers
     public class BooksController : ControllerBase
     {
         private readonly AppDbContext context;
+        private readonly IMapper mapper;
 
-        public BooksController(AppDbContext context)
+        public BooksController(AppDbContext context, IMapper mapper)
         {
             this.context = context;
+            this.mapper = mapper;
         }
 
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<Book>> Get(int id)
+        public async Task<ActionResult<BookDTO>> Get(int id)
         {
-            return await context.Books.Include(x => x.Author).FirstOrDefaultAsync(x => x.Id == id);
+            Book book = await context.Books.FirstOrDefaultAsync(x => x.Id == id);
+
+            return mapper.Map<BookDTO>(book);
         }
 
         [HttpPost]
-        public async Task<ActionResult> Post(Book book)
+        public async Task<ActionResult> Post(BookCreateDTO bookCreateDTO)
         {
-            var hasAuthor = await context.Authors.AnyAsync(x => x.Id == book.AuthorId);
-
-            if (!hasAuthor)
+            if (bookCreateDTO.AuthorsIds == null)
             {
-                return BadRequest($"Author ID: {book.AuthorId} doesn't exist on system");
+                return BadRequest("Cannot create book without authors.");
             }
+
+            List<int> authorsIds = await context.Authors
+            .Where(author => bookCreateDTO.AuthorsIds.Contains(author.Id))
+            .Select(author => author.Id).ToListAsync();
+
+            if (bookCreateDTO.AuthorsIds.Count != authorsIds.Count)
+            {
+                return BadRequest("One or more authors are not registered.");
+            }
+
+            Book book = mapper.Map<Book>(bookCreateDTO);
+
+            if (book.AuthorBook != null)
+            {
+                for (int i = 0; i < book.AuthorBook.Count; i++)
+                {
+                    book.AuthorBook[i].Order = i;
+                }
+            }
+
             context.Add(book);
             await context.SaveChangesAsync();
-            return Created();
+            return Ok();
         }
     }
 }

@@ -5,9 +5,9 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using dotnetApiCourse.Filters;
 using dotnetApiCourse.Middlewares;
-using dotnetApiCourse.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 namespace dotnetApiCourse
 {
@@ -30,17 +30,16 @@ namespace dotnetApiCourse
 
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("defaultConnection")));
 
-            services.AddTransient<ActionFilter>();
-
-            services.AddHostedService<WriteOnFile>();
-
-            services.AddResponseCaching();
-
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen();
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "DotNetApiCourse", Version = "v1" });
+            });
+
+            services.AddAutoMapper(typeof(Startup));
         }
 
         //This has the middleware, order of middleware matters.
@@ -60,15 +59,12 @@ namespace dotnetApiCourse
 
             app.UseRouting();
 
-            app.UseResponseCaching();
-
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
-
         }
     }
 }

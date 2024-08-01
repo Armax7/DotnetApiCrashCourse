@@ -5,16 +5,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using dotnetApiCourse.Validations;
 
-namespace dotnetApiCourse.Entities
+namespace dotnetApiCourse.DTOs
 {
-    public class Book
+    public class BookCreateDTO
     {
-        public int Id { get; set; }
-        [Required]
         [FirstUpperCase]
         [StringLength(250, ErrorMessage = "Field {0} is to long, use less than {1} characters")]
         public string Title { get; set; }
-        public List<Comment> Comments { get; set; }
-        public List<AuthorBook> AuthorBook { get; set; }
+        public List<int> AuthorsIds { get; set; }
     }
 }

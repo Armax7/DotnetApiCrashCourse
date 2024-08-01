@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using dotnetApiCourse;
 
@@ -10,9 +11,11 @@ using dotnetApiCourse;
 namespace dotnetApiCourse.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240801220430_Comments")]
+    partial class Comments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -37,24 +40,6 @@ namespace dotnetApiCourse.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Authors");
-                });
-
-            modelBuilder.Entity("dotnetApiCourse.Entities.AuthorBook", b =>
-                {
-                    b.Property<int>("AuthorId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("BookId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Order")
-                        .HasColumnType("int");
-
-                    b.HasKey("AuthorId", "BookId");
-
-                    b.HasIndex("BookId");
-
-                    b.ToTable("AuthorBook");
                 });
 
             modelBuilder.Entity("dotnetApiCourse.Entities.Book", b =>
@@ -93,26 +78,7 @@ namespace dotnetApiCourse.Migrations
 
                     b.HasIndex("BookId");
 
-                    b.ToTable("Comments");
-                });
-
-            modelBuilder.Entity("dotnetApiCourse.Entities.AuthorBook", b =>
-                {
-                    b.HasOne("dotnetApiCourse.Entities.Author", "Author")
-                        .WithMany("AuthorBook")
-                        .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("dotnetApiCourse.Entities.Book", "Book")
-                        .WithMany("AuthorBook")
-                        .HasForeignKey("BookId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Author");
-
-                    b.Navigation("Book");
+                    b.ToTable("Comment");
                 });
 
             modelBuilder.Entity("dotnetApiCourse.Entities.Comment", b =>
@@ -126,15 +92,8 @@ namespace dotnetApiCourse.Migrations
                     b.Navigation("Book");
                 });
 
-            modelBuilder.Entity("dotnetApiCourse.Entities.Author", b =>
-                {
-                    b.Navigation("AuthorBook");
-                });
-
             modelBuilder.Entity("dotnetApiCourse.Entities.Book", b =>
                 {
-                    b.Navigation("AuthorBook");
-
                     b.Navigation("Comments");
                 });
 #pragma warning restore 612, 618

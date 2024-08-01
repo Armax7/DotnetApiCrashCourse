@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
+using dotnetApiCourse.DTOs;
 using dotnetApiCourse.Entities;
 using dotnetApiCourse.Filters;
 using Microsoft.AspNetCore.Authorization;
@@ -16,54 +18,59 @@ namespace dotnetApiCourse.Controllers
     public class AuthorsController : ControllerBase
     {
         private readonly AppDbContext context;
-        private readonly ILogger<AuthorsController> logger;
+        private readonly IMapper mapper;
 
-        public AuthorsController(AppDbContext context, ILogger<AuthorsController> logger)
+        public AuthorsController(AppDbContext context, ILogger<AuthorsController> logger, IMapper mapper)
         {
             this.context = context;
-            this.logger = logger;
+            this.mapper = mapper;
         }
 
         [HttpGet]
-        [HttpGet("list")]
         [ResponseCache(Duration = 5)]
-        [ServiceFilter(typeof(ActionFilter))]
-        public async Task<ActionResult<List<Author>>> Get([FromQuery] string name)
+        public async Task<ActionResult<List<AuthorDTO>>> Get([FromQuery] string name)
         {
-            logger.LogWarning("Obtaining Authors");
+            List<Author> authorList;
             if (name == null)
             {
-                return await context.Authors.Include(x => x.Books).ToListAsync();
+                authorList = await context.Authors.ToListAsync();
             }
-            return await context.Authors.Include(x => x.Books).Where(x => x.Name.Contains(name)).ToListAsync();
+            else
+            {
+                authorList = await context.Authors.Where(author => author.Name.Contains(name)).ToListAsync();
+            }
+
+            return mapper.Map<List<AuthorDTO>>(authorList);
         }
 
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<Author>> GetById(int id)
+        public async Task<ActionResult<AuthorDTO>> GetById(int id)
         {
-            var author = await context.Authors.Include(x => x.Books).FirstOrDefaultAsync(x => x.Id == id);
+            var author = await context.Authors.FirstOrDefaultAsync(author => author.Id == id);
 
             if (author == null)
             {
                 return NotFound();
             }
 
-            return author;
+            return mapper.Map<AuthorDTO>(author);
         }
 
         [HttpPost]
-        public async Task<ActionResult> Post(Author author)
+        public async Task<ActionResult> Post(AuthorCreateDTO authorCreateDto)
         {
-            var authorExists = await context.Authors.AnyAsync(x => x.Name == author.Name);
+            var authorExists = await context.Authors.AnyAsync(author => author.Name == authorCreateDto.Name);
 
             if (authorExists)
             {
                 return BadRequest("Author already exists");
             }
 
+            Author author = mapper.Map<Author>(authorCreateDto);
+
             context.Add(author);
             await context.SaveChangesAsync();
-            return Created();
+            return Ok();
         }
 
         [HttpPut("{id:int}")] //api/authors/:id
@@ -80,7 +87,7 @@ namespace dotnetApiCourse.Controllers
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> Delete(int id)
         {
-            var hasAuthor = await context.Authors.AnyAsync(x => x.Id == id);
+            var hasAuthor = await context.Authors.AnyAsync(author => author.Id == id);
             if (!hasAuthor)
             {
                 return NotFound();
