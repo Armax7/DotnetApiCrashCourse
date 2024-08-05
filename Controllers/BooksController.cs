@@ -23,7 +23,7 @@ namespace dotnetApiCourse.Controllers
             this.mapper = mapper;
         }
 
-        [HttpGet("{id:int}")]
+        [HttpGet("{id:int}", Name = "getBookById")]
         public async Task<ActionResult<BookDTOwAuthors>> Get(int id)
         {
             Book book = await context.Books
@@ -65,7 +65,10 @@ namespace dotnetApiCourse.Controllers
 
             context.Add(book);
             await context.SaveChangesAsync();
-            return Ok();
+
+            BookDTO bookDTO = mapper.Map<BookDTO>(book);
+
+            return CreatedAtRoute("getBookById", new { id = book.Id }, bookDTO);
         }
     }
 }

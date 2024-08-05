@@ -23,7 +23,7 @@ namespace dotnetApiCourse.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<CommentDTO>>> Get(int bookId)
+        public async Task<ActionResult<List<CommentDTO>>> GetByBook(int bookId)
         {
             var bookExists = await Context.Books.AnyAsync(book => book.Id == bookId);
 
@@ -31,11 +31,24 @@ namespace dotnetApiCourse.Controllers
             {
                 return NotFound();
             }
-            
+
             List<Comment> comments = await Context.Comments
-            .Where(comment => comment.Id == bookId).ToListAsync();
+            .Where(comment => comment.BookId == bookId).ToListAsync();
 
             return Mapper.Map<List<CommentDTO>>(comments);
+        }
+
+        [HttpGet("{id:int}", Name = "getCommentById")]
+        public async Task<ActionResult<CommentDTO>> GetById(int id)
+        {
+            Comment comment = await Context.Comments.FirstOrDefaultAsync(comment => comment.Id == id);
+
+            if (comment == null)
+            {
+                return NotFound();
+            }
+
+            return Mapper.Map<CommentDTO>(comment);
         }
 
         [HttpPost]
@@ -52,7 +65,10 @@ namespace dotnetApiCourse.Controllers
             comment.BookId = bookId;
             Context.Add(comment);
             await Context.SaveChangesAsync();
-            return Ok();
+
+            CommentDTO commentDTO = Mapper.Map<CommentDTO>(comment);
+
+            return CreatedAtRoute("getCommentById", new { id = comment.Id, bookId = bookId }, commentDTO);
         }
     }
 }

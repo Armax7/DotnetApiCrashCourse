@@ -50,7 +50,7 @@ namespace dotnetApiCourse.Controllers
             return mapper.Map<List<AuthorDTOwBooks>>(authorList);
         }
 
-        [HttpGet("{id:int}")]
+        [HttpGet("{id:int}", Name = "getAuthorById")]
         public async Task<ActionResult<AuthorDTOwBooks>> GetById(int id)
         {
             var author = await context.Authors
@@ -80,7 +80,10 @@ namespace dotnetApiCourse.Controllers
 
             context.Add(author);
             await context.SaveChangesAsync();
-            return Ok();
+
+            AuthorDTO authorDTO = mapper.Map<AuthorDTO>(author);
+
+            return CreatedAtRoute("getAuthorById", new { id = author.Id }, authorDTO);
         }
 
         [HttpPut("{id:int}")] //api/authors/:id
@@ -92,6 +95,7 @@ namespace dotnetApiCourse.Controllers
             }
             context.Update(author);
             await context.SaveChangesAsync();
+
             return Ok();
         }
         [HttpDelete("{id:int}")]
