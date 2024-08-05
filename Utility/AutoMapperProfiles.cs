@@ -12,25 +12,32 @@ namespace dotnetApiCourse.Utility
     {
         public AutoMapperProfiles()
         {
-            CreateMap<AuthorCreateDTO, Author>();
             CreateMap<Author, AuthorDTO>();
+            CreateMap<AuthorCreateDTO, Author>();
 
             CreateMap<Author, AuthorDTOwBooks>()
             .ForMember(authorDto => authorDto.Books, options => options.MapFrom(MapAuthorDtoBooks));
 
-            CreateMap<BookCreateDTO, Book>()
-            .ForMember(book => book.AuthorBook, options => options.MapFrom(MapAuthorsBooks));
+            CreateMap<AuthorUpdateDTO, Author>();
+
 
             CreateMap<Book, BookDTO>();
 
             CreateMap<Book, BookDTOwAuthors>()
             .ForMember(bookDto => bookDto.Authors, options => options.MapFrom(MapBookDtoAuthors));
 
-            CreateMap<CommentCreateDTO, Comment>();
+            CreateMap<BookCreateDTO, Book>()
+            .ForMember(book => book.AuthorBook, options => options.MapFrom(MapAuthorsBooksOnCreate));
+
+            CreateMap<BookUpdateDTO, Book>()
+            .ForMember(book => book.AuthorBook, options => options.MapFrom(MapAuthorsBooksOnUpdate));
+
             CreateMap<Comment, CommentDTO>();
+            CreateMap<CommentCreateDTO, Comment>();
+            CreateMap<CommentUpdateDTO, Comment>();
         }
 
-        private List<AuthorBook> MapAuthorsBooks(BookCreateDTO bookCreateDTO, Book book)
+        private List<AuthorBook> MapAuthorsBooksOnCreate(BookCreateDTO bookCreateDTO, Book book)
         {
             List<AuthorBook> result = [];
 
@@ -40,6 +47,23 @@ namespace dotnetApiCourse.Utility
             }
 
             foreach (var authorId in bookCreateDTO.AuthorsIds)
+            {
+                result.Add(new AuthorBook() { AuthorId = authorId });
+            }
+
+            return result;
+        }
+
+        private List<AuthorBook> MapAuthorsBooksOnUpdate(BookUpdateDTO bookUpdateDTO, Book book)
+        {
+            List<AuthorBook> result = [];
+
+            if (bookUpdateDTO.AuthorsIds == null)
+            {
+                return result;
+            }
+
+            foreach (var authorId in bookUpdateDTO.AuthorsIds)
             {
                 result.Add(new AuthorBook() { AuthorId = authorId });
             }

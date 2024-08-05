@@ -87,17 +87,23 @@ namespace dotnetApiCourse.Controllers
         }
 
         [HttpPut("{id:int}")] //api/authors/:id
-        public async Task<ActionResult> Put(Author author, int id)
+        public async Task<ActionResult> Put(AuthorUpdateDTO authorUpdateDto, int id)
         {
-            if (author.Id != id)
+            bool authorExists = await context.Authors.AnyAsync(author => author.Id == id);
+            if (!authorExists)
             {
                 return BadRequest("Author's ID does not match any author on system");
             }
+
+            Author author = mapper.Map<Author>(authorUpdateDto);
+            author.Id = id;
+
             context.Update(author);
             await context.SaveChangesAsync();
 
-            return Ok();
+            return NoContent();
         }
+        
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> Delete(int id)
         {

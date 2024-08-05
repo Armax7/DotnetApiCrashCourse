@@ -70,5 +70,30 @@ namespace dotnetApiCourse.Controllers
 
             return CreatedAtRoute("getCommentById", new { id = comment.Id, bookId = bookId }, commentDTO);
         }
+
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult> Put(int bookId, int id, CommentUpdateDTO commentUpdateDTO)
+        {
+            bool bookExists = await Context.Books.AnyAsync(book => book.Id == bookId);
+            if (!bookExists)
+            {
+                return NotFound("Book does not exist on system");
+            }
+
+            bool commentExists = await Context.Comments.AnyAsync(comment => comment.Id == id);
+            if (!commentExists)
+            {
+                return NotFound("Comment does not exist on system");
+            }
+
+            Comment comment = Mapper.Map<Comment>(commentUpdateDTO);
+            comment.Id = id;
+            comment.BookId = bookId;
+
+            Context.Update(comment);
+            await Context.SaveChangesAsync();
+
+            return NoContent();
+        }
     }
 }

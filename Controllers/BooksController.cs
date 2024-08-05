@@ -55,6 +55,40 @@ namespace dotnetApiCourse.Controllers
 
             Book book = mapper.Map<Book>(bookCreateDTO);
 
+            AssignOrderToAuthors(book);
+
+            context.Add(book);
+            await context.SaveChangesAsync();
+
+            BookDTO bookDTO = mapper.Map<BookDTO>(book);
+
+            return CreatedAtRoute("getBookById", new { id = book.Id }, bookDTO);
+        }
+
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult> Put(BookUpdateDTO bookUpdateDTO, int id)
+        {
+            //Entity Framework Core remembers everything that has been assigned to "book"
+            Book book = await context.Books
+            .Include(book => book.AuthorBook)
+            .FirstOrDefaultAsync(book => book.Id == id);
+
+            if (book == null)
+            {
+                return NotFound();
+            }
+
+            //Becaus EF Core remembers "book" this updates with presisting changes
+            book = mapper.Map(bookUpdateDTO, book);
+            AssignOrderToAuthors(book);
+
+            await context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        private static void AssignOrderToAuthors(Book book)
+        {
             if (book.AuthorBook != null)
             {
                 for (int i = 0; i < book.AuthorBook.Count; i++)
@@ -63,12 +97,6 @@ namespace dotnetApiCourse.Controllers
                 }
             }
 
-            context.Add(book);
-            await context.SaveChangesAsync();
-
-            BookDTO bookDTO = mapper.Map<BookDTO>(book);
-
-            return CreatedAtRoute("getBookById", new { id = book.Id }, bookDTO);
         }
     }
 }
