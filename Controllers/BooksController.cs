@@ -24,11 +24,16 @@ namespace dotnetApiCourse.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<BookDTO>> Get(int id)
+        public async Task<ActionResult<BookDTOwAuthors>> Get(int id)
         {
-            Book book = await context.Books.FirstOrDefaultAsync(x => x.Id == id);
+            Book book = await context.Books
+            .Include(book => book.AuthorBook)
+            .ThenInclude(authorBook => authorBook.Author)
+            .FirstOrDefaultAsync(x => x.Id == id);
 
-            return mapper.Map<BookDTO>(book);
+            book.AuthorBook = [.. book.AuthorBook.OrderBy(authorBook => authorBook.Order)];
+
+            return mapper.Map<BookDTOwAuthors>(book);
         }
 
         [HttpPost]

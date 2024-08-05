@@ -28,32 +28,42 @@ namespace dotnetApiCourse.Controllers
 
         [HttpGet]
         [ResponseCache(Duration = 5)]
-        public async Task<ActionResult<List<AuthorDTO>>> Get([FromQuery] string name)
+        public async Task<ActionResult<List<AuthorDTOwBooks>>> Get([FromQuery] string name)
         {
             List<Author> authorList;
             if (name == null)
             {
-                authorList = await context.Authors.ToListAsync();
+                authorList = await context.Authors
+                .Include(author => author.AuthorBook)
+                .ThenInclude(authorBook => authorBook.Book)
+                .ToListAsync();
             }
             else
             {
-                authorList = await context.Authors.Where(author => author.Name.Contains(name)).ToListAsync();
+                authorList = await context.Authors
+                .Where(author => author.Name.Contains(name))
+                .Include(author => author.AuthorBook)
+                .ThenInclude(authorBook => authorBook.Book)
+                .ToListAsync();
             }
 
-            return mapper.Map<List<AuthorDTO>>(authorList);
+            return mapper.Map<List<AuthorDTOwBooks>>(authorList);
         }
 
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<AuthorDTO>> GetById(int id)
+        public async Task<ActionResult<AuthorDTOwBooks>> GetById(int id)
         {
-            var author = await context.Authors.FirstOrDefaultAsync(author => author.Id == id);
+            var author = await context.Authors
+            .Include(author => author.AuthorBook)
+            .ThenInclude(authorBook => authorBook.Book)
+            .FirstOrDefaultAsync(author => author.Id == id);
 
             if (author == null)
             {
                 return NotFound();
             }
 
-            return mapper.Map<AuthorDTO>(author);
+            return mapper.Map<AuthorDTOwBooks>(author);
         }
 
         [HttpPost]

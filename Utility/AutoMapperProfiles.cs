@@ -14,9 +14,18 @@ namespace dotnetApiCourse.Utility
         {
             CreateMap<AuthorCreateDTO, Author>();
             CreateMap<Author, AuthorDTO>();
+
+            CreateMap<Author, AuthorDTOwBooks>()
+            .ForMember(authorDto => authorDto.Books, options => options.MapFrom(MapAuthorDtoBooks));
+
             CreateMap<BookCreateDTO, Book>()
             .ForMember(book => book.AuthorBook, options => options.MapFrom(MapAuthorsBooks));
+
             CreateMap<Book, BookDTO>();
+
+            CreateMap<Book, BookDTOwAuthors>()
+            .ForMember(bookDto => bookDto.Authors, options => options.MapFrom(MapBookDtoAuthors));
+
             CreateMap<CommentCreateDTO, Comment>();
             CreateMap<Comment, CommentDTO>();
         }
@@ -33,6 +42,47 @@ namespace dotnetApiCourse.Utility
             foreach (var authorId in bookCreateDTO.AuthorsIds)
             {
                 result.Add(new AuthorBook() { AuthorId = authorId });
+            }
+
+            return result;
+        }
+
+        private List<AuthorDTO> MapBookDtoAuthors(Book book, BookDTO bookDto)
+        {
+            List<AuthorDTO> result = [];
+
+            if (book.AuthorBook == null)
+            {
+                return result;
+            }
+
+            foreach (var authorBook in book.AuthorBook)
+            {
+                result.Add(new AuthorDTO()
+                {
+                    Id = authorBook.AuthorId,
+                    Name = authorBook.Author.Name
+                });
+            }
+            return result;
+        }
+
+        private List<BookDTO> MapAuthorDtoBooks(Author author, AuthorDTO authorDto)
+        {
+            List<BookDTO> result = [];
+
+            if (author.AuthorBook == null)
+            {
+                return result;
+            }
+
+            foreach (var authorBook in author.AuthorBook)
+            {
+                result.Add(new BookDTO()
+                {
+                    Id = authorBook.BookId,
+                    Title = authorBook.Book.Title
+                });
             }
 
             return result;
