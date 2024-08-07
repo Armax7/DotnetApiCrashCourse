@@ -47,7 +47,7 @@ namespace dotnetApiCourse
         //This has the middleware, order of middleware matters.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
         {
-            app.UseLogHttpResponse();
+            // app.UseLogHttpResponse();
 
             // Configure the HTTP request pipeline.
             if (env.IsDevelopment())

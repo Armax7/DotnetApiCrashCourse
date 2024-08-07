@@ -9,6 +9,7 @@ using dotnetApiCourse.Filters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace dotnetApiCourse.Controllers
 {
@@ -19,11 +20,13 @@ namespace dotnetApiCourse.Controllers
     {
         private readonly AppDbContext context;
         private readonly IMapper mapper;
+        private readonly IConfiguration configuration;
 
-        public AuthorsController(AppDbContext context, ILogger<AuthorsController> logger, IMapper mapper)
+        public AuthorsController(AppDbContext context, ILogger<AuthorsController> logger, IMapper mapper, IConfiguration configuration)
         {
             this.context = context;
             this.mapper = mapper;
+            this.configuration = configuration;
         }
 
         [HttpGet]
@@ -103,7 +106,7 @@ namespace dotnetApiCourse.Controllers
 
             return NoContent();
         }
-        
+
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> Delete(int id)
         {
