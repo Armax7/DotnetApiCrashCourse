@@ -32,6 +32,11 @@ namespace dotnetApiCourse.Controllers
             .ThenInclude(authorBook => authorBook.Author)
             .FirstOrDefaultAsync(x => x.Id == id);
 
+            if (book == null)
+            {
+                return NotFound("Book not found");
+            }
+
             book.AuthorBook = [.. book.AuthorBook.OrderBy(authorBook => authorBook.Order)];
 
             return mapper.Map<BookDTOwAuthors>(book);
@@ -116,6 +121,20 @@ namespace dotnetApiCourse.Controllers
             mapper.Map(bookPatchDTO, book);
             await context.SaveChangesAsync();
 
+            return NoContent();
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult> Delete(int id)
+        {
+            var hasBook = await context.Books.AnyAsync(book => book.Id == id);
+            if (!hasBook)
+            {
+                return NotFound();
+            }
+
+            context.Remove(new Book() { Id = id });
+            await context.SaveChangesAsync();
             return NoContent();
         }
 
