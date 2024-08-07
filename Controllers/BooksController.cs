@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using dotnetApiCourse.DTOs;
 using dotnetApiCourse.Entities;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -82,6 +83,37 @@ namespace dotnetApiCourse.Controllers
             book = mapper.Map(bookUpdateDTO, book);
             AssignOrderToAuthors(book);
 
+            await context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        [HttpPatch("{id:int}")]
+        public async Task<ActionResult> Patch(int id, JsonPatchDocument<BookPatchDTO> jsonPatchDocument)
+        {
+            if (jsonPatchDocument == null)
+            {
+                return BadRequest();
+            }
+
+            Book book = await context.Books.FirstOrDefaultAsync(book => book.Id == id);
+
+            if (book == null)
+            {
+                return NotFound();
+            }
+
+            BookPatchDTO bookPatchDTO = mapper.Map<BookPatchDTO>(book);
+
+            jsonPatchDocument.ApplyTo(bookPatchDTO, ModelState);
+
+            bool isValidModel = TryValidateModel(bookPatchDTO);
+            if (!isValidModel)
+            {
+                return BadRequest(ModelState);
+            }
+
+            mapper.Map(bookPatchDTO, book);
             await context.SaveChangesAsync();
 
             return NoContent();

@@ -9,9 +9,11 @@ namespace dotnetApiCourse.DTOs
 {
     public class BookCreateDTO
     {
+        [Required]
         [FirstUpperCase]
         [StringLength(250, ErrorMessage = "Field {0} is to long, use less than {1} characters")]
         public string Title { get; set; }
+        public DateTime PublicationDate { get; set; }
         public List<int> AuthorsIds { get; set; }
     }
 }

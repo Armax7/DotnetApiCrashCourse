@@ -32,6 +32,8 @@ namespace dotnetApiCourse.Utility
             CreateMap<BookUpdateDTO, Book>()
             .ForMember(book => book.AuthorBook, options => options.MapFrom(MapAuthorsBooksOnUpdate));
 
+            CreateMap<BookPatchDTO, Book>().ReverseMap();
+
             CreateMap<Comment, CommentDTO>();
             CreateMap<CommentCreateDTO, Comment>();
             CreateMap<CommentUpdateDTO, Comment>();

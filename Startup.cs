@@ -26,7 +26,9 @@ namespace dotnetApiCourse
             services.AddControllers(options =>
             {
                 options.Filters.Add(typeof(ExceptionFilter));
-            }).AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+            })
+            .AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles)
+            .AddNewtonsoftJson();
 
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("defaultConnection")));
 
