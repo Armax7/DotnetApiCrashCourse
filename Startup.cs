@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using dotnetApiCourse.Filters;
 using dotnetApiCourse.Middlewares;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -42,6 +43,10 @@ namespace dotnetApiCourse
             });
 
             services.AddAutoMapper(typeof(Startup));
+
+            services.AddIdentity<IdentityUser, IdentityRole>()
+            .AddEntityFrameworkStores<AppDbContext>()
+            .AddDefaultTokenProviders();
         }
 
         //This has the middleware, order of middleware matters.

@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using AutoMapper;
 using dotnetApiCourse.DTOs;
 using dotnetApiCourse.Entities;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -24,8 +26,19 @@ namespace dotnetApiCourse.Controllers
             this.mapper = mapper;
         }
 
+        [HttpGet]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<ActionResult<List<BookDTOwAuthors>>> GetAllBooks()
+        {
+            List<Book> books = await context.Books
+            .Include(book => book.AuthorBook)
+            .ThenInclude(authorBook => authorBook.Author).ToListAsync();
+
+            return mapper.Map<List<BookDTOwAuthors>>(books);
+        }
+
         [HttpGet("{id:int}", Name = "getBookById")]
-        public async Task<ActionResult<BookDTOwAuthors>> Get(int id)
+        public async Task<ActionResult<BookDTOwAuthors>> GetBookById(int id)
         {
             Book book = await context.Books
             .Include(book => book.AuthorBook)
